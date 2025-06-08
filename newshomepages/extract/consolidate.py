@@ -103,6 +103,9 @@ def consolidate(
         # Pull out the files
         qualified_files = []
         print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
+        # Print the first one for review
+        if item_data["files"]:
+            print(f"--- First file: {item_data['files'][0]}")
         for p in item_data["files"]:
             if handle in p["name"].lower():
                 # Check if the file is of a type we want
