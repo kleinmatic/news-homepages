@@ -180,10 +180,6 @@ def consolidate(
     print(f"🗑️ Deleting {items_path}")
     shutil.rmtree(items_path)
 
-    # Delete the zip file
-    zip_path = output_path / "latest.zip"
-    zip_path.unlink()
-
 
 def _get_items_torrent(output_path: Path) -> Path:
     """Download a .torrent file and extract its contents using BitTorrent protocol.
