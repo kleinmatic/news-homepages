@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import random
 import shutil
 import time
 from datetime import datetime
@@ -105,9 +106,9 @@ def consolidate(
         print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
         # Print the first one for review
         if item_data["files"]:
-            print(f"--- First file: {item_data['files'][0]}")
+            print(f"--- Random file: {random.choice(item_data['files'])}")
         for p in item_data["files"]:
-            if handle in p["name"].lower():
+            if handle.lower() in p["name"].lower():
                 # Check if the file is of a type we want
                 if p["format"].upper() in ["JSON", "JPEG", "HTML"]:
                     qualified_files.append(p)
