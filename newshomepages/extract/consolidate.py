@@ -101,18 +101,16 @@ def consolidate(
         item_list.append(item_dict)
 
         # Pull out the files
-        qualified_files = [
-            p
-            for p in item_data["files"]
-            if (
-                handle in p["name"].lower()
-                and (
-                    p["format"] in ["JSON", "JPEG", "HTML"]
-                    or p["name"].lower().endswith("ads.txt")
-                    or p["name"].lower().endswith("robots.txt")
-                )
-            )
-        ]
+        qualified_files = []
+        for p in item_data["files"]:
+            if handle in p["name"].lower():
+                # Check if the file is of a type we want
+                if p["format"] in ["JSON", "JPEG", "HTML"]:
+                    qualified_files.append(p)
+                elif p["name"].lower().endswith("ads.txt"):
+                    qualified_files.append(p)
+                elif p["name"].lower().endswith("robots.txt"):
+                    qualified_files.append(p)
 
         # Loop through them
         for f in qualified_files:
@@ -127,6 +125,8 @@ def consolidate(
                 sha1=f["sha1"],
             )
             file_list.append(file_dict)
+
+        print(f"-- {len(qualified_files)} found")
 
     # Write out items
     utils.write_csv(item_list, output_path / "items.csv")
