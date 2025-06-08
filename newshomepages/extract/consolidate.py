@@ -142,7 +142,7 @@ def consolidate(
     robotstxt_list = []
     print("🪆 Extracting files")
     for f in track(file_list):
-        name = f["file_name"]
+        name = f["file_name"].lower()
         if name.endswith(".jpg"):
             if "fullpage" in name:
                 f["type"] = "fullpage"
