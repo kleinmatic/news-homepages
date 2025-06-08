@@ -24,6 +24,7 @@ spectra = "*"
 "mastodon.py" = "*"
 sqlite-robotstxt = "*"
 sqlean = "*"
+libtorrent = "*"
 
 [dev-packages]
 pre-commit = "*"

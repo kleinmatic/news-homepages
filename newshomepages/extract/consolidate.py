@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import json
-import zipfile
+import shutil
+import time
 from datetime import datetime
 from pathlib import Path
 
 import click
+import libtorrent as lt
 import requests
-from retry import retry
 from rich import print
 from rich.progress import track
 
@@ -66,15 +67,15 @@ def consolidate(
     utils.write_csv(site2bundle_list, output_path / "site-bundle-relationships.csv")
 
     print("🪆 Extracting items")
-    zf = _get_zip_archive(output_path)
-    json_list = [f for f in zf.namelist() if f.endswith(".json")]
+    items_path = _get_items_torrent(output_path)
+    json_list = [f for f in items_path.glob("*.json") if f.is_file()]
     item_list = []
     file_list = []
     for file_name in track(json_list):
         print(f"- {file_name}")
 
         # Read the data out of the zip file
-        with zf.open(file_name) as fp:
+        with open(file_name) as fp:
             item_data = json.loads(fp.read())
 
         # If the JSON doesn't have the right keys, skip it
@@ -175,25 +176,80 @@ def consolidate(
     utils.write_csv(adstxt_list, output_path / "adstxt-files.csv")
     utils.write_csv(robotstxt_list, output_path / "robotstxt-files.csv")
 
+    # Delete the items path folder
+    print(f"🗑️ Deleting {items_path}")
+    shutil.rmtree(items_path)
+
     # Delete the zip file
     zip_path = output_path / "latest.zip"
     zip_path.unlink()
 
 
-@retry(tries=3, delay=300)
-def _get_zip_archive(output_dir: Path) -> zipfile.ZipFile:
-    print("⬇️ Downloading latest data")
-    url = "https://archive.org/compress/latest-homepages/formats=JSON,JPEG,ITEM%20TILE,ARCHIVE%20BITTORRENT,METADATA"
-    output_path = output_dir / "latest.zip"
-    timeout = 60 * 10  # 10 minutes
-    _download_url(url, output_path, timeout)
-    return zipfile.ZipFile(output_path)
+def _get_items_torrent(output_path: Path) -> Path:
+    """Download a .torrent file and extract its contents using BitTorrent protocol.
 
+    Args:
+        output_path (str): Directory to save the downloaded content
 
-def _download_url(url: str, output_path: Path, timeout: int) -> None:
-    """Download the provided URL to the provided path."""
-    with requests.get(url, stream=True, timeout=timeout) as r:
-        r.raise_for_status()
-        with open(output_path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    # Step 1: Download the .torrent file into memory
+    print("Downloading .torrent file...")
+    url = (
+        "https://archive.org/download/latest-homepages/latest-homepages_archive.torrent"
+    )
+    response = requests.get(url)
+    response.raise_for_status()
+    # Keep torrent data in memory
+    torrent_data = response.content
+    print(f"✓ Downloaded .torrent file ({len(torrent_data)} bytes)")
+
+    # Step 2: Use libtorrent to download the actual content
+    print("Starting BitTorrent download...")
+    # Initialize libtorrent session
+    session = lt.session()
+    session.listen_on(6881, 6891)
+
+    # Load torrent info directly from memory
+    torrent_info = lt.torrent_info(torrent_data)
+
+    # Add torrent to session
+    params = {
+        "ti": torrent_info,
+        "save_path": str(output_path),
+    }
+    handle = session.add_torrent(params)
+
+    print(f"✓ Added torrent: {torrent_info.name()}")
+    print(f"✓ Total size: {torrent_info.total_size() / (1024*1024):.1f} MB")
+    print(f"✓ Number of files: {torrent_info.num_files()}")
+
+    # Monitor download progress
+    print("\nDownloading content...")
+    while not handle.is_seed():
+        status = handle.status()
+
+        progress_info = {
+            "Progress": f"{status.progress * 100:.1f}%",
+            "Download Rate": f"{status.download_rate / 1024:.1f} KB/s",
+            "Upload Rate": f"{status.upload_rate / 1024:.1f} KB/s",
+            "Peers": status.num_peers,
+            "Seeds": status.num_seeds,
+        }
+
+        # Clear line and print progress
+        print(
+            f"\r{progress_info['Progress']} | "
+            f"↓{progress_info['Download Rate']} | "
+            f"↑{progress_info['Upload Rate']} | "
+            f"Peers: {progress_info['Peers']} | "
+            f"Seeds: {progress_info['Seeds']}",
+            end="\n",
+        )
+
+        time.sleep(1)
+
+    print("\n✓ Download completed!")
+    print(f"✓ Files saved to: {output_path}")
+    return output_path / "latest-homepages"

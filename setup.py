@@ -101,6 +101,7 @@ setup(
         "sqlean",
         "Mastodon.py",
         "sqlite-robotstxt",
+        "libtorrent",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
