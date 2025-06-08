@@ -84,7 +84,7 @@ def consolidate(
             continue
 
         # Pull out the data we want to keep
-        identifier = file_name.replace(".json", "")
+        identifier = str(file_name).replace(".json", "")
         handle = identifier[:-5]
         item_dict = dict(
             identifier=item_data["metadata"]["identifier"],
