@@ -85,8 +85,8 @@ def consolidate(
             continue
 
         # Pull out the data we want to keep
-        identifier = str(file_name).replace(".json", "")
-        handle = identifier[:-5]
+        handle = file_name.stem
+        print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
         item_dict = dict(
             identifier=item_data["metadata"]["identifier"],
             handle=handle,
@@ -103,7 +103,6 @@ def consolidate(
 
         # Pull out the files
         qualified_files = []
-        print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
         # Print the first one for review
         if item_data["files"]:
             print(f"--- Random file: {random.choice(item_data['files'])}")
