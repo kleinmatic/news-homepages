@@ -102,10 +102,11 @@ def consolidate(
 
         # Pull out the files
         qualified_files = []
+        print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
         for p in item_data["files"]:
             if handle in p["name"].lower():
                 # Check if the file is of a type we want
-                if p["format"] in ["JSON", "JPEG", "HTML"]:
+                if p["format"].upper() in ["JSON", "JPEG", "HTML"]:
                     qualified_files.append(p)
                 elif p["name"].lower().endswith("ads.txt"):
                     qualified_files.append(p)
@@ -126,7 +127,7 @@ def consolidate(
             )
             file_list.append(file_dict)
 
-        print(f"-- {len(qualified_files)} found")
+        print(f"-- {len(qualified_files)} qualified files found")
 
     # Write out items
     utils.write_csv(item_list, output_path / "items.csv")
