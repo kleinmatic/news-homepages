@@ -209,7 +209,28 @@ def _get_items_torrent(output_path: Path) -> Path:
     print("Starting BitTorrent download...")
     # Initialize libtorrent session
     session = lt.session()
-    session.listen_on(6881, 6891)
+
+    # Enhanced session settings for better peer discovery
+    settings = {
+        "enable_dht": True,  # Enable DHT for trackerless torrents
+        "enable_lsd": True,  # Enable Local Service Discovery
+        "enable_upnp": True,  # Enable UPnP port mapping
+        "enable_natpmp": True,  # Enable NAT-PMP port mapping
+        "announce_to_all_trackers": True,  # Announce to all trackers
+        "announce_to_all_tiers": True,  # Announce to all tiers
+    }
+    session.apply_settings(settings)
+
+    # Set ports
+    port_ranges = [(6881, 6891), (6901, 6911), (51413, 51423)]
+    for start_port, end_port in port_ranges:
+        try:
+            session.listen_on(start_port, end_port)
+            print(f"✓ Listening on ports {start_port}-{end_port}")
+            break
+        except Exception as e:
+            print(f"✗ Failed to listen on ports {start_port}-{end_port}: {e}")
+            continue
 
     # Load torrent info directly from memory
     torrent_info = lt.torrent_info(torrent_data)
@@ -225,10 +246,20 @@ def _get_items_torrent(output_path: Path) -> Path:
     print(f"✓ Total size: {torrent_info.total_size() / (1024*1024):.1f} MB")
     print(f"✓ Number of files: {torrent_info.num_files()}")
 
-    # Monitor download progress
-    print("\nDownloading content...")
+    # Enhanced monitoring with timeout
+    print("\nSearching for peers and downloading...")
+    start_time = time.time()
+    timeout_minutes = 30  # Set timeout in minutes
+    timeout_seconds = timeout_minutes * 60
+
     while not handle.is_seed():
         status = handle.status()
+        elapsed_time = time.time() - start_time
+
+        # Check for timeout
+        if elapsed_time > timeout_seconds:
+            print(f"\n✗ Timeout after {timeout_minutes} minutes")
+            raise TimeoutError(f"Download timed out after {timeout_minutes} minutes")
 
         progress_info = {
             "Progress": f"{status.progress * 100:.1f}%",
@@ -236,6 +267,7 @@ def _get_items_torrent(output_path: Path) -> Path:
             "Upload Rate": f"{status.upload_rate / 1024:.1f} KB/s",
             "Peers": status.num_peers,
             "Seeds": status.num_seeds,
+            "Elapsed": f"{elapsed_time/60:.1f}m",
         }
 
         # Clear line and print progress
@@ -245,6 +277,7 @@ def _get_items_torrent(output_path: Path) -> Path:
             f"↑{progress_info['Upload Rate']} | "
             f"Peers: {progress_info['Peers']} | "
             f"Seeds: {progress_info['Seeds']}",
+            f"Time: {progress_info['Elapsed']}",
             end="\n",
         )
 
