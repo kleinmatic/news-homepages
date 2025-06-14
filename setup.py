@@ -71,7 +71,6 @@ setup(
             "newshomepages-hyperlinks=newshomepages.hyperlinks:cli",
             "newshomepages-mosaic=newshomepages.mosaic:cli",
             "newshomepages-robotstxt=newshomepages.robotstxt:cli",
-            "newshomepages-rss=newshomepages.rss:cli",
             "newshomepages-screenshot=newshomepages.screenshot:cli",
             "newshomepages-site=newshomepages.site:cli",
             "newshomepages-slack=newshomepages.slack:cli",

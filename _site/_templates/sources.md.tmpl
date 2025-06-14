@@ -2,10 +2,8 @@
 
 The archiving routine is currently capturing {{ site_list|length }} sites.
 
-A full RSS feed is at [all.xml](https://palewi.re/docs/news-homepages/rss/sites/all.xml). An OPML file collecting all individual RSS feeds is at [opml.xml](https://palewi.re/docs/news-homepages/rss/sites/opml.xml).
-
-| Site  | Latest screenshot | RSS |
-| :---- | :---------------: | :-- |
+| Site  | Latest screenshot |
+| :---- | :---------------: |
 {% for obj in site_list -%}
-|[{{ obj.name }}](https://palewi.re/docs/news-homepages/sites/{{ obj.handle }}.html)|[🔗](https://raw.githubusercontent.com/palewire/news-homepages/main/latest-screenshots/{{ obj.handle }}.jpg)|[🔗](https://palewi.re/docs/news-homepages/rss/sites/{{ obj.handle }}.xml)|
+|[{{ obj.name }}](https://palewi.re/docs/news-homepages/sites/{{ obj.handle }}.html)|[🔗](https://raw.githubusercontent.com/palewire/news-homepages/main/latest-screenshots/{{ obj.handle }}.jpg)|
 {% endfor %}

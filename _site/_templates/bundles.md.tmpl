@@ -2,8 +2,8 @@
 
 Sites are grouped into {{ bundle_list|length }} bundles based on location, ideology and topic.
 
-| Bundle  | RSS |
-| :-----  | :-- |
+| Bundle  |
+| :-----  |
 {% for obj in bundle_list -%}
-|[{{ obj.name }}](https://palewi.re/docs/news-homepages/bundles/{{ obj.slug }}.html)|[🔗](https://palewi.re/docs/news-homepages/rss/bundles/{{ obj.slug }}.xml)|
+|[{{ obj.name }}](https://palewi.re/docs/news-homepages/bundles/{{ obj.slug }}.html)|
 {% endfor %}

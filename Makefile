@@ -94,10 +94,6 @@ site: ## Build the site
 	@$(PYTHON) newshomepages.site bundle-detail
 	@$(PYTHON) newshomepages.site country-detail
 	@$(PYTHON) newshomepages.site language-detail
-	@$(PYTHON) newshomepages.rss sites
-	@$(PYTHON) newshomepages.rss opml
-	@$(PYTHON) newshomepages.rss bundles
-	@$(PYTHON) newshomepages.rss countries
 
 
 #

@@ -23,7 +23,7 @@ spacy = "*"
 spectra = "*"
 "mastodon.py" = "*"
 sqlite-robotstxt = "*"
-sqlean = "*"
+"sqlean.py" = "*"
 libtorrent = "*"
 
 [dev-packages]

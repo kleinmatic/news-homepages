@@ -55,10 +55,6 @@ Commands
    :prog: robotstxt
    :nested: full
 
-.. click:: newshomepages.rss:cli
-   :prog: rss
-   :nested: full
-
 .. click:: newshomepages.screenshot:cli
    :prog: screenshot
    :nested: full
