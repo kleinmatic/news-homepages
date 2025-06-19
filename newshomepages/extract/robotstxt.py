@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+import sqlite3
 import time
 from pathlib import Path
 from urllib.parse import urlparse
 
 import click
 import pandas as pd
-import sqlean as sqlite3
 import sqlite_robotstxt
 from rich import print
 
