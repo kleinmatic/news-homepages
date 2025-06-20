@@ -23,6 +23,7 @@ def openai(no_cache=False):
 
     # Read in our dataset
     robotstxt_df = utils.get_extract_df("robotstxt-sample.csv", use_cache=use_cache)
+    print(f"Found {len(robotstxt_df)} robots.txt files in the dataset")
 
     # Assert that only each handle has only one url
     assert robotstxt_df.groupby("handle").url.nunique().all() == 1
@@ -97,6 +98,9 @@ def openai(no_cache=False):
 
     # Get the percentage
     site_count = len(merged_df)
+    print(
+        f":abacus: Found {disallow_count} sites blocking at least one AI bot out of {site_count} total sites"
+    )
     disallow_percent = round(disallow_count / site_count * 100, 1)
 
     # Render the page
