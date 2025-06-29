@@ -16,11 +16,12 @@ def cli():
 
 
 @cli.command()
-@click.option("--site", "site", default=None)
-@click.option("--country", "country", default=None)
-@click.option("--language", "language", default=None)
-@click.option("--bundle", "bundle", default=None)
-@click.option("--days", "days", default="90")
+@click.option("-s", "--site", "site", default=None)
+@click.option("-c", "--country", "country", default=None)
+@click.option("-l", "--language", "language", default=None)
+@click.option("-b", "--bundle", "bundle", default=None)
+@click.option("-d", "--days", "days", default="90")
+@click.option("-u", "--use-cache", "use_cache", default=False, is_flag=True)
 @click.option("-o", "--output-path", "output_path", default=None)
 def hyperlinks(
     site: typing.Optional[str] = None,
@@ -28,13 +29,14 @@ def hyperlinks(
     language: typing.Optional[str] = None,
     bundle: typing.Optional[str] = None,
     days: typing.Optional[str] = None,
+    use_cache: bool = False,
     output_path: typing.Optional[typing.Any] = None,
 ):
     """Download and parse the provided site's hyperlinks files."""
     # Get all hyperlink files
-    hyperlink_df = utils.get_hyperlink_df(use_cache=False, verbose=True).sort_values(
-        ["handle", "date"]
-    )
+    hyperlink_df = utils.get_hyperlink_df(
+        use_cache=use_cache, verbose=True
+    ).sort_values(["handle", "date"])
 
     # Get the data we want
     if site:
@@ -50,16 +52,18 @@ def hyperlinks(
         site_list = utils.get_sites_in_bundle(bundle)
         slug = bundle.lower()
 
+    # Filter down to the sites we want
     handle_list = [s["handle"] for s in site_list]
     filtered_df = hyperlink_df[hyperlink_df.handle.isin(handle_list)].copy()
 
+    # Filter down to the days we want
     if days:
         max_date = filtered_df["date"].max()
         cutoff_date = max_date - pd.Timedelta(days=int(days))
-        filtered_df = filtered_df[filtered_df["date"] > cutoff_date].copy()
         print(
             f"Trimming to last {days} days from {cutoff_date:%Y-%m-%d} to {max_date:%Y-%m-%d}"
         )
+        filtered_df = filtered_df[filtered_df["date"] > cutoff_date].copy()
 
     # See how many files there are
     archived_files = set(filtered_df.url.unique())

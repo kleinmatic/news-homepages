@@ -85,7 +85,9 @@ def consolidate(
             continue
 
         # Pull out the data we want to keep
-        handle = file_name.stem
+        handle = file_name.stem[
+            :-5
+        ]  # Use stem to lose the .json and [:-5] to lose the year suffix.
         print(f"-- Reviewing {len(item_data['files'])} files for {handle}")
         item_dict = dict(
             identifier=item_data["metadata"]["identifier"],
